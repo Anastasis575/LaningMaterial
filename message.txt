@@ -1,0 +1,33 @@
+import os
+from cryptography  import fernet 
+import base64
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+pepper=os.urandom(16)
+with open("pepper.txt","rb")as f:  #το πεππερ μην το αγγίξεις ποτέ , μπορείς να το ανοίξεις αλλα μην γράψεις τίποτα 
+   pepper=f.read() #κρατάει αυτό που είχα πει , το σταθερό "αλάτι" το οποίο δεν αλλάζει 
+
+password=input("δωσε εναν κωδικο ")
+keimeno=input("δωσε ενα κειμενο")
+file_name=input("δωσε ενα ονονμα αρχείου")
+kakourghma=PBKDF2HMAC(algorithm=hashes.SHA256() , length=32 , salt=pepper , iterations=480000) #οι συντελεστες της συναρτησης  απο τον προηγουμενο κωδικα
+key=kakourghma.derive(password.encode())
+key=base64.urlsafe_b64encode(key)
+algorithmos=fernet.Fernet(key)
+encoded_bites_tou_keimenou=keimeno.encode() #νιωθω πως οι μεταβλητές μου είναι αρκετά self-explanatory
+encoded_bites_tou_crypted_keimenou=algorithmos.encrypt(encoded_bites_tou_keimenou)
+anoikto_arheio=open(file_name + ".txt", "w",) #εδω φτιαχνουμε ένα νέο ανοιτό αρχείο στο οποίο πετάμε τα encoded bites (εγώ έχω ονομάσει το δικό μου ως push it θα το δεις στο μειλ)
+#decrypted_encoded_bites_tou_keimenou=algorithmos.decrypt(encoded_bites_tou_crypted_keimenou)
+decoded_encoded_bites_tou_encrypted_keimenou=encoded_bites_tou_crypted_keimenou.decode() #μην δίνεις σημασία στο encoded μετά απο το encoded
+anoikto_arheio.write(decoded_encoded_bites_tou_encrypted_keimenou) # απλως μου φάνηκε αστείο και είπα να το κρατήσω , στην πραγματικότητα θα επρεπε απλώς να έγραφα decoded_bytes του encrypted κειμενου 
+anoikto_arheio.close() #ΠΑΝΤΑ ΚΛΕΙΝΟΥΜΕ ΕΝΑ ΑΡΧΕΙΟ ΟΤΑΝ ΤΟ ΑΝΟΙΓΟΥΜΕ ΠΟΛΎ ΣΗΜΑΝΤΙΚΟ 
+#λιγα πραγματα σαν θεωρία , δίνουμε τον κωδικό σε str τον μετατρέπουμε σε bytes ,τον κάνουμε scramble , τον ξαναμετατρέπουμε σε str και πορβαλλεται
+#υπάρχει η απαλή διαφορά μεταξή encrypt και encode όπου άμα καταλαβαίνω καλά το decrpyt μετατρέπει τα bytes σε στρινγκ και το decode τα πετατρέπει σε string που μπορουμε να διαβασουμε και το αντίστροφο
+
+readstuff=open(file_name + ".txt" , "r")
+
+diavasmena_encoded_bites_tou_keimenou=kakourghma.derive(password.encode())
+decrypted_encoded_bites_tou_keimenou=algorithmos.decrypt(diavasmena_encoded_bites_tou_keimenou)
+
+readstuff.close()
+print(decrypted_encoded_bites_tou_keimenou)
